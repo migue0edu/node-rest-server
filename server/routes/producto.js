@@ -6,7 +6,7 @@ let app = express();
 let Producto = require('../models/producto');
 
 //Obtener productoSchema
-app.get('productos', verificaToken, (req, res) => {
+app.get('/productos', verificaToken, (req, res) => {
   //trae todos los productos
   //populate: usuario categorias
   //paginado
@@ -15,10 +15,10 @@ app.get('productos', verificaToken, (req, res) => {
   let paginado = req.query.paginado || 5;
   paginado = Number(paginado);
   Producto.find({disponible: true})
-          .populate('usuario', 'nombr email')
+          .populate('usuario', 'nombre email')
           .populate('Categoria', 'descripcion')
           .limit(paginado)
-          .expec((err, productos) =>{
+          .exec((err, productos) =>{
             if(err){
               return res.status(500).json({
                 ok: false,
@@ -28,14 +28,14 @@ app.get('productos', verificaToken, (req, res) => {
             res.json({
               ok: true,
               productos
-            })
+            });
           });
 });
 
 app.get('/productos/:id', verificaToken,  (req, res) => {
   let id= req.params.id;
   Producto.findById(id)
-          .populate('usuario', 'nombr email')
+          .populate('usuario', 'nombre email')
           .populate('categoria', 'descripcion')
           .exec((err, product) =>{
             if(err){
@@ -50,14 +50,13 @@ app.get('/productos/:id', verificaToken,  (req, res) => {
                 err: {
                   message: 'El ID no es correcto'
                 }
-              })
+              });
             }
             res.json({
               ok: true,
               producto: product
-            })
+            });
           });
-  })
 });
 
 //Bucar productos
@@ -86,10 +85,10 @@ app.post('/productos', verificaToken, (req, res) => {
     precioUni: body.precioUni,
     descripcion: body.descripcion,
     disponible: body.disponible,
-    categorias: body.categorias
+    categoria: body.categoria
   })
 
-  Producto.save((err, product) =>{
+  producto.save((err, product) =>{
     if(err){
       return res.status(500).json({
         ok:false,
@@ -107,10 +106,10 @@ app.put('/productos/:id', verificaToken,  (req, res) => {
   let id = req.params.id;
   let body = req.body;
 
-  let nombre = {body.nombre}
-  let precio = {body.precioUni}
-  let descripcion = {body.descripcion}
-  let disponible = {body.disponible}
+  let nombre = body.nombre
+  let precio = body.precioUni
+  let descripcion = body.descripcion
+  let disponible = body.disponible
 
   Categoria.findByIdAndUpdate(id, {new: true, nombre, precio, descripcion, disponible, runValidators: true},(err, product) =>{
     if(err){
@@ -149,7 +148,8 @@ app.delete('/productos/:id', verificaToken, (req, res) => {
         err: {
           message: 'El ID no existe.'
         }
-      })
+      });
+    }
       product.disponible = false
       product.save( (err, productBorrado) => {
         if(err){
@@ -158,7 +158,7 @@ app.delete('/productos/:id', verificaToken, (req, res) => {
             err: {
               message: 'Error al conectar la base de datos.'
             }
-          })
+          });
         }
       });
       res.json({
@@ -166,7 +166,6 @@ app.delete('/productos/:id', verificaToken, (req, res) => {
         producto: productBorrado,
         mensaje: 'Producto borrado.'
       })
-    }
   });
 });
 

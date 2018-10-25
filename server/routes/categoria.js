@@ -5,7 +5,7 @@ let Categoria = require('../models/categoria');
 
 //Mostrar todas las categorias
 app.get('/categoria',verificaToken,  (req, res) => {
-  Categoria.findById({})
+  Categoria.find({})
             .sort('descripcion') //ordena los resultados
             .populate('usuario', 'nombre email') //carga informacion de la coleccion referenciada
             .exec( (err, categorias)=> {
@@ -51,7 +51,7 @@ app.get('/categoria/:id', (req, res) => {
 });
 
 //Crear categorias
-app.post('/categoria', (req, res) => {
+app.post('/categoria',verificaToken,  (req, res) => {
     let body = req.body;
     let categoria = new Categoria({
       descripcion: body.descripcion,
